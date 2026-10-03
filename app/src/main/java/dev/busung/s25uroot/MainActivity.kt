@@ -11,7 +11,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
@@ -182,6 +181,7 @@ class MainActivity : ComponentActivity() {
                     onVerifyExploitSizeChanged = { enabled ->
                         AppPreferences.setVerifyExploitSize(this, enabled)
                         verifyExploitSize = enabled
+                    },
                     onShizukuModeChanged = { enabled ->
                         AppPreferences.setShizukuMode(this, enabled)
                         shizukuMode = enabled
@@ -272,9 +272,6 @@ private fun RootApp(
     onAdvancedModeChanged: (Boolean) -> Unit,
     onVerifyExploitSizeChanged: (Boolean) -> Unit,
     shizukuMode: Boolean,
-    onAccentColorChanged: (AccentColor) -> Unit,
-    onThemeModeChanged: (AppThemeMode) -> Unit,
-    onAdvancedModeChanged: (Boolean) -> Unit,
     onShizukuModeChanged: (Boolean) -> Unit,
     openInstaller: (String?) -> Unit,
 ) {
@@ -445,9 +442,6 @@ private fun RootApp(
                     onAdvancedModeChanged = onAdvancedModeChanged,
                     onVerifyExploitSizeChanged = onVerifyExploitSizeChanged,
                     shizukuMode = shizukuMode,
-                    onAccentColorChanged = onAccentColorChanged,
-                    onThemeModeChanged = onThemeModeChanged,
-                    onAdvancedModeChanged = onAdvancedModeChanged,
                     onShizukuModeChanged = onShizukuModeChanged,
                 )
             }
@@ -990,9 +984,6 @@ private fun SettingsPage(
     onAdvancedModeChanged: (Boolean) -> Unit,
     onVerifyExploitSizeChanged: (Boolean) -> Unit,
     shizukuMode: Boolean,
-    onAccentColorChanged: (AccentColor) -> Unit,
-    onThemeModeChanged: (AppThemeMode) -> Unit,
-    onAdvancedModeChanged: (Boolean) -> Unit,
     onShizukuModeChanged: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1162,30 +1153,33 @@ private fun SettingsPage(
                 }) {
                     Text(stringResource(R.string.custom_payload_remove))
                 }
-                    icon = Icons.Rounded.VerifiedUser,
-                    title = stringResource(R.string.shizuku_mode),
-                    description = stringResource(R.string.shizuku_mode_description),
-                    checked = shizukuMode,
-                    position = SettingsCardPosition.Bottom,
-                    onCheckedChange = { enabled ->
-                        if (!enabled) {
-                            onShizukuModeChanged(false)
-                        } else {
-                            scope.launch {
-                                ShizukuController.pingUntilRunning()
-                                if (ShizukuController.isRunning()) {
-                                    onShizukuModeChanged(true)
-                                    if (!ShizukuController.isGranted()) {
-                                        ShizukuController.requestPermission()
-                                    }
-                                } else {
-                                    showShizukuMissingDialog = true
+            }
+        }
+        item {
+            SettingsSwitchCard(
+                icon = Icons.Rounded.VerifiedUser,
+                title = stringResource(R.string.shizuku_mode),
+                description = stringResource(R.string.shizuku_mode_description),
+                checked = shizukuMode,
+                position = SettingsCardPosition.Bottom,
+                onCheckedChange = { enabled ->
+                    if (!enabled) {
+                        onShizukuModeChanged(false)
+                    } else {
+                        scope.launch {
+                            ShizukuController.pingUntilRunning()
+                            if (ShizukuController.isRunning()) {
+                                onShizukuModeChanged(true)
+                                if (!ShizukuController.isGranted()) {
+                                    ShizukuController.requestPermission()
                                 }
+                            } else {
+                                showShizukuMissingDialog = true
                             }
                         }
-                    },
-                )
-            }
+                    }
+                },
+            )
         }
         item { SectionLabel(stringResource(R.string.advanced)) }
         item {
