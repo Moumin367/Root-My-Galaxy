@@ -93,6 +93,8 @@ object AppPreferences {
         context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
             .edit()
             .putString(PAYLOAD_REPOSITORY, repository.trim())
+            .apply()
+    }
     fun shizukuMode(context: Context): Boolean =
         context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
             .getBoolean(SHIZUKU_MODE, false)
